@@ -1,6 +1,7 @@
 package com.example.androideatitserver;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.View;
 
 import com.example.androideatitserver.Common.Common;
 import com.example.androideatitserver.Interface.ItemClickListener;
+import com.example.androideatitserver.Model.Order;
 import com.example.androideatitserver.Model.Request;
 import com.example.androideatitserver.ViewHolder.OrderViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -26,7 +28,7 @@ public class OrderStatus extends AppCompatActivity {
 
     FirebaseRecyclerAdapter<Request,OrderViewHolder> adapter;
     FirebaseDatabase db;
-    DatabaseReference request;
+    DatabaseReference requests;
 
     MaterialSpinner spinner;
 
@@ -36,7 +38,7 @@ public class OrderStatus extends AppCompatActivity {
         setContentView(R.layout.activity_order_status);
 
         db = FirebaseDatabase.getInstance();
-        request = db.getReference("Requests");
+        requests = db.getReference("Requests");
 
         recyclerView = (RecyclerView)findViewById(R.id.listOrders);
         recyclerView.setHasFixedSize(true);
@@ -52,10 +54,10 @@ public class OrderStatus extends AppCompatActivity {
                 Request.class,
                 R.layout.order_layout,
                 OrderViewHolder.class,
-                request
+                requests
         ) {
             @Override
-            protected void populateViewHolder(OrderViewHolder viewHolder, Request model, int position) {
+            protected void populateViewHolder(OrderViewHolder viewHolder, final Request model, int position) {
                 viewHolder.txtOrderId.setText(adapter.getRef(position).getKey());
                 viewHolder.txtOrderStatus.setText(Common.convertCodeToString(model.getStatus()));
                 viewHolder.txtOrderAddress.setText(model.getAddress());
@@ -64,7 +66,9 @@ public class OrderStatus extends AppCompatActivity {
                 viewHolder.setItemClickListner(new ItemClickListener() {
                     @Override
                     public void onClick(View view, int position, boolean isLongClick) {
-
+                        Intent trackingOrder = new Intent(OrderStatus.this,TrackingOrder.class);
+                        Common.currentRequest = model;
+                        startActivity(trackingOrder);
                     }
                 });
             }
@@ -83,7 +87,7 @@ public class OrderStatus extends AppCompatActivity {
     }
 
     private void deleteOrder(String key) {
-        request.child(key).removeValue();
+        requests.child(key).removeValue();
     }
 
     private void showUpdateDialog(String key, final Request item) {
@@ -108,7 +112,7 @@ public class OrderStatus extends AppCompatActivity {
                 dialog.dismiss();
                 item.setStatus(String.valueOf(spinner.getSelectedIndex()));
 
-                request.child(localKey).setValue(item);
+                requests.child(localKey).setValue(item);
             }
         });
         alerDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
