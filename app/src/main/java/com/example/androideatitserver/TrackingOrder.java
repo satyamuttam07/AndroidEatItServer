@@ -72,7 +72,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 
         mService = Common.getGeoCodeService();
 
-        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                && ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
             requestRuntimePermission();
         }else{
@@ -92,7 +92,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 
     private void displayLocation() {
 
-        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
             requestRuntimePermission();
         }else{
@@ -109,7 +109,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
                 drawRoute(yourLocation,Common.currentRequest.getAddress());
 
             }else{
-                Toast.makeText(this, "Couldn't get the Location", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Unable to get the Location", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -125,16 +125,18 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
                     String lat = ((JSONArray)jsonObject.get("results"))
                                     .getJSONObject(0)
                                     .getJSONObject("geometry")
+                                    .getJSONObject("location")
                                     .get("lat").toString();
 
 
                     String lng = ((JSONArray)jsonObject.get("results"))
                             .getJSONObject(0)
                             .getJSONObject("geometry")
+                            .getJSONObject("location")
                             .get("lng").toString();
 
                     LatLng orderLocation = new LatLng(Double.parseDouble(lat),Double.parseDouble(lng));
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.box);
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.parcel);
                     bitmap = Common.scaleBitmap(bitmap,70,70);
                     MarkerOptions marker = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bitmap))
                             .title("Order of "+Common.currentRequest.getPhone())
@@ -177,7 +179,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
-    protected synchronized void buildGoogleApiClient() {
+    protected synchronized void buildGoogleApiClient()   {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -239,30 +241,15 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
         displayLocation();
     }
 
-//    @Override
-//    public void onStatusChanged(String provider, int status, Bundle extras) {
-//
-//    }
-//
-//    @Override
-//    public void onProviderEnabled(String provider) {
-//
-//    }
-//
-//    @Override
-//    public void onProviderDisabled(String provider) {
-
-//    }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
         displayLocation();
         startLocationUpdate();
-
     }
+
     private void startLocationUpdate() {
-        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
             return;
         }
